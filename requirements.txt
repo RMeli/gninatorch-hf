@@ -1,1 +1,1 @@
-gninatorch=0.0.2
+gninatorch==0.0.2
