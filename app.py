@@ -190,7 +190,7 @@ def predict(protein_file, ligand_file, cnn: str = "default"):
             "CNNaffinity": [affinity.item()],
             "CNNvariance": [affinity_var.item()],
         }
-    )
+    ).round(6)
 
 
 if __name__ == "__main__":
