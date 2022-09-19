@@ -1,9 +1,20 @@
-import gradio as gr
-
 import os
 
 
-def load_html(html_file: str):
+def load_html(html_file: str) -> str:
+    """
+    Load file from HTML directory.
+
+    Parameters
+    ----------
+    html_file: str
+        HTML file name
+
+    Returns
+    -------
+    str
+        HTML file content
+    """
     with open(os.path.join("html", html_file), "r") as f:
         return f.read()
 
@@ -24,12 +35,38 @@ def load_protein_from_file(protein_file) -> str:
         return f.read()
 
 
-def load_ligand_from_file(ligand_file):
+def load_ligand_from_file(ligand_file) -> str:
+    """
+    Load ligand from file.
+
+    Parameters
+    ----------
+    ligand_file: _TemporaryFileWrapper
+        GradIO file object
+
+    Returns
+    -------
+    str
+        Ligand SDF file content
+    """
     with open(ligand_file.name, "r") as f:
         return f.read()
 
 
-def protein_html_from_file(protein_file):
+def protein_html_from_file(protein_file) -> str:
+    """
+    Wrap 3Dmol.js code around protein PDB file.
+
+    Parameters
+    ----------
+    protein_file: _TemporaryFileWrapper
+        GradIO file object
+
+    Returns
+    -------
+    str
+        3Dmol.js HTML code for displaying a PDB file
+    """
     protein = load_protein_from_file(protein_file)
     protein_html = load_html("protein.html")
 
@@ -40,7 +77,21 @@ def protein_html_from_file(protein_file):
     return wrapper.replace("%%%HTML%%%", html)
 
 
-def ligand_html_from_file(ligand_file):
+def ligand_html_from_file(ligand_file) -> str:
+    """
+    Wrap 3Dmol.js code around ligand SDF file.
+
+    Parameters
+    ----------
+    ligand_file: _TemporaryFileWrapper
+        GradIO file object
+
+    Returns
+    -------
+    str
+        3Dmol.js HTML code for displaying a SDF file
+    """
+
     ligand = load_ligand_from_file(ligand_file)
     ligand_html = load_html("ligand.html")
 
@@ -64,7 +115,24 @@ def protein_ligand_html_from_file(protein_file, ligand_file):
     return wrapper.replace("%%%HTML%%%", html)
 
 
-def predict(protein_file, ligand_file, cnn="default"):
+def predict(protein_file, ligand_file, cnn: str = "default"):
+    """
+    Run gnina-torch on protein-ligand complex.
+
+    Parameters
+    ----------
+    protein_file: _TemporaryFileWrapper
+        GradIO file object
+    ligand_file: _TemporaryFileWrapper
+        GradIO file object
+    cnn: str
+        CNN model to use
+
+    Returns
+    -------
+    dict[str, float]
+        CNNscore, CNNaffinity, and CNNvariance
+    """
     import molgrid
     from gninatorch import gnina, dataloaders
     import torch
@@ -85,6 +153,7 @@ def predict(protein_file, ligand_file, cnn="default"):
         iteration_scheme=molgrid.IterationScheme.SmallEpoch,
     )
 
+    # FIXME: Do this properly... =( [Might require light gnina-torch refactoring]
     with open("data.in", "w") as f:
         f.write(protein_file.name)
         f.write(" ")
@@ -124,40 +193,66 @@ def predict(protein_file, ligand_file, cnn="default"):
     )
 
 
-demo = gr.Blocks()
+if __name__ == "__main__":
+    import gradio as gr
 
-with demo:
-    gr.Markdown("# Protein and Ligand")
-    with gr.Row():
-        with gr.Box():
-            pfile = gr.File(file_count="single")
-            pbtn = gr.Button("View")
+    demo = gr.Blocks()
 
-            protein = gr.HTML()
-            pbtn.click(fn=protein_html_from_file, inputs=[pfile], outputs=protein)
-
-        with gr.Box():
-            lfile = gr.File(file_count="single")
-            lbtn = gr.Button("View")
-
-            ligand = gr.HTML()
-            lbtn.click(fn=ligand_html_from_file, inputs=[lfile], outputs=ligand)
-
-    gr.Markdown("# Protein-Ligand Complex")
-    with gr.Row():
-        plcomplex = gr.HTML()
-
-        # TODO: Automatically display complex when both files are uploaded
-        plbtn = gr.Button("View")
-        plbtn.click(
-            fn=protein_ligand_html_from_file, inputs=[pfile, lfile], outputs=plcomplex
+    with demo:
+        gr.Markdown("# Gnina-Torch")
+        gr.Markdown(
+            "Score your protein-ligand compex and predict the binding affinity with [Gnina]"
+            + "(https://github.com/gnina/gnina)'s scoring function. Poewerd by [gnina-torch]"
+            + "(https://github.com/RMeli/gnina-torch), a PyTorch implementation of Gnina's"
+            + " scoring function."
         )
 
-    gr.Markdown("# Gnina-Torch")
-    with gr.Row():
-        df = gr.Dataframe()
-        btn = gr.Button("Score!")
-        btn.click(fn=predict, inputs=[pfile, lfile], outputs=df)
+        gr.Markdown("## Protein and Ligand")
+        gr.Markdown(
+            "Upload your protein and ligand files in PDB and SDF format, respectively."
+        )
+        with gr.Row():
+            with gr.Box():
+                pfile = gr.File(file_count="single", label="Protein file (PDB)")
+                pbtn = gr.Button("View")
 
+                protein = gr.HTML()
+                pbtn.click(fn=protein_html_from_file, inputs=[pfile], outputs=protein)
 
-demo.launch()
+            with gr.Box():
+                lfile = gr.File(file_count="single", label="Ligand file (SDF)")
+                lbtn = gr.Button("View")
+
+                ligand = gr.HTML()
+                lbtn.click(fn=ligand_html_from_file, inputs=[lfile], outputs=ligand)
+
+        gr.Markdown("## Protein-Ligand Complex")
+        with gr.Row():
+            plcomplex = gr.HTML()
+
+            # TODO: Automatically display complex when both files are uploaded
+            plbtn = gr.Button("View")
+            plbtn.click(
+                fn=protein_ligand_html_from_file,
+                inputs=[pfile, lfile],
+                outputs=plcomplex,
+            )
+
+        gr.Markdown("## Gnina-Torch")
+        with gr.Row():
+            dd = gr.Dropdown(
+                choices=[
+                    "default",
+                    "redock_default2018_ensemble",
+                    "general_default2018_ensemble",
+                    "crossdock_default2018_ensemble",
+                ],
+                value="default",
+                label="CNN model",
+            )
+
+            df = gr.Dataframe()
+            btn = gr.Button("Score!")
+            btn.click(fn=predict, inputs=[pfile, lfile, dd], outputs=df)
+
+    demo.launch()
