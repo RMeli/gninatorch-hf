@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style>
+        .mol-container {
+            width: 100%;
+            height: 700px;
+            position: relative;
+        }
+
+        .mol-container select {
+            background-image: None;
+        }
+    </style>
+    <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+</head>
+
+<body>
+    <div id="container" class="mol-container"></div>
+    <script>
+        let sdf = `%%%SDF%%%`;
+        let pdb = `%%%PDB%%%`;
+        $(document).ready(function () {
+            let element = $("#container");
+            let config = { backgroundColor: "white" };
+            let viewer = $3Dmol.createViewer(element, config);
+            viewer.addModel(pdb, "pdb");
+            viewer.addModel(sdf, "sdf");
+            viewer.getModel(0).setStyle({}, { cartoon: { colorscheme: "whiteCarbon" } });
+            viewer.getModel(1).setStyle({}, { stick: { colorscheme: "lightgreyCarbon" } });
+            viewer.zoomTo();
+            viewer.render();
+            viewer.zoom(0.8, 2000);
+        })
+    </script>
+</body>
+</html>

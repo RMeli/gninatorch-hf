@@ -1,0 +1,12 @@
+name: gt-hf
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - pip
+
+  - ipython
+
+  - pip:
+    - gninatorch
+    - gradio
