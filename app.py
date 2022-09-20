@@ -202,7 +202,7 @@ if __name__ == "__main__":
         gr.Markdown("# Gnina-Torch")
         gr.Markdown(
             "Score your protein-ligand compex and predict the binding affinity with [Gnina]"
-            + "(https://github.com/gnina/gnina)'s scoring function. Poewerd by [gnina-torch]"
+            + "(https://github.com/gnina/gnina)'s scoring function. Powered by [gnina-torch]"
             + "(https://github.com/RMeli/gnina-torch), a PyTorch implementation of Gnina's"
             + " scoring function."
         )
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         gr.Markdown("## Protein and Ligand")
         gr.Markdown(
             "Upload your protein and ligand files in PDB and SDF format, respectively."
-            + "Optionally, you can visualise the protein, the ligand, and the"
+            + " Optionally, you can visualise the protein, the ligand, and the"
             + "protein-ligand complex."
         )
         with gr.Row():
