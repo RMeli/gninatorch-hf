@@ -266,4 +266,11 @@ if __name__ == "__main__":
                     btn = gr.Button("Score!")
                     btn.click(fn=predict, inputs=[pfile, lfile, dd], outputs=df)
 
+        gr.Markdown(
+            "## Acknowledgements\n"
+            + "* Simon Dürr, for the blog post [Visualize proteins on Hugging Face Spaces]"
+            + "(https://huggingface.co/blog/spaces_3dmoljs)\n"
+            + "* Andrew McNutt, for converting Gnina models' weights to PyTorch"
+        )
+
     demo.launch()
