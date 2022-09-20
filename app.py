@@ -210,49 +210,60 @@ if __name__ == "__main__":
         gr.Markdown("## Protein and Ligand")
         gr.Markdown(
             "Upload your protein and ligand files in PDB and SDF format, respectively."
+            + "Optionally, you can visualise the protein, the ligand, and the"
+            + "protein-ligand complex."
         )
         with gr.Row():
             with gr.Box():
                 pfile = gr.File(file_count="single", label="Protein file (PDB)")
-                pbtn = gr.Button("View")
+                pbtn = gr.Button("View Protein")
 
                 protein = gr.HTML()
                 pbtn.click(fn=protein_html_from_file, inputs=[pfile], outputs=protein)
 
             with gr.Box():
                 lfile = gr.File(file_count="single", label="Ligand file (SDF)")
-                lbtn = gr.Button("View")
+                lbtn = gr.Button("View Ligand")
 
                 ligand = gr.HTML()
                 lbtn.click(fn=ligand_html_from_file, inputs=[lfile], outputs=ligand)
 
-        gr.Markdown("## Protein-Ligand Complex")
-        with gr.Row():
-            plcomplex = gr.HTML()
+            with gr.Box():
+                with gr.Column():
+                    plcomplex = gr.HTML()
 
-            # TODO: Automatically display complex when both files are uploaded
-            plbtn = gr.Button("View")
-            plbtn.click(
-                fn=protein_ligand_html_from_file,
-                inputs=[pfile, lfile],
-                outputs=plcomplex,
-            )
+                    # TODO: Automatically display complex when both files are uploaded
+                    plbtn = gr.Button("View Protein-Ligand Complex")
+                    plbtn.click(
+                        fn=protein_ligand_html_from_file,
+                        inputs=[pfile, lfile],
+                        outputs=plcomplex,
+                    )
 
         gr.Markdown("## Gnina-Torch")
+        gr.Markdown(
+            "Score your protein-ligand complex with [gnina-torch]"
+            + "(https://github.com/RMeli/gnina-torch). You can choose between different"
+            + "pre-trained Gnina models. See [McNutte et al. (2021)]"
+            + "(https://doi.org/10.1186/s13321-021-00522-2) for more details."
+        )
         with gr.Row():
-            dd = gr.Dropdown(
-                choices=[
-                    "default",
-                    "redock_default2018_ensemble",
-                    "general_default2018_ensemble",
-                    "crossdock_default2018_ensemble",
-                ],
-                value="default",
-                label="CNN model",
-            )
-
             df = gr.Dataframe()
-            btn = gr.Button("Score!")
-            btn.click(fn=predict, inputs=[pfile, lfile, dd], outputs=df)
+
+            with gr.Column():
+                dd = gr.Dropdown(
+                    choices=[
+                        "default",
+                        "redock_default2018_ensemble",
+                        "general_default2018_ensemble",
+                        "crossdock_default2018_ensemble",
+                    ],
+                    value="default",
+                    label="CNN model",
+                )
+
+                with gr.Row():
+                    btn = gr.Button("Score!")
+                    btn.click(fn=predict, inputs=[pfile, lfile, dd], outputs=df)
 
     demo.launch()
