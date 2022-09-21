@@ -216,6 +216,7 @@ if __name__ == "__main__":
         with gr.Row():
             with gr.Box():
                 pfile = gr.File(file_count="single", label="Protein file (PDB)")
+                gr.Examples(["mols/1cbr_protein.pdb"], inputs=pfile)
                 pbtn = gr.Button("View Protein")
 
                 protein = gr.HTML()
@@ -223,6 +224,7 @@ if __name__ == "__main__":
 
             with gr.Box():
                 lfile = gr.File(file_count="single", label="Ligand file (SDF)")
+                gr.Examples(["mols/1cbr_ligand.sdf"], inputs=lfile)
                 lbtn = gr.Button("View Ligand")
 
                 ligand = gr.HTML()
