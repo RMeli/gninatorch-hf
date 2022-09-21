@@ -1,22 +1,30 @@
 import os
 
 
-def load_html(html_file: str) -> str:
+def load_file(fpath: str) -> str:
     """
-    Load file from HTML directory.
+    Load file content.
 
     Parameters
     ----------
-    html_file: str
-        HTML file name
+    fpath: str
+        File path
 
     Returns
     -------
     str
-        HTML file content
+        File content
     """
-    with open(os.path.join("html", html_file), "r") as f:
+    with open(fpath, "r") as f:
         return f.read()
+
+
+def load_html(html_file: str) -> str:
+    return load_file(os.path.join("html", html_file))
+
+
+def load_md(md_file: str) -> str:
+    return load_file(os.path.join("md", md_file))
 
 
 def load_protein_from_file(protein_file) -> str:
@@ -199,56 +207,36 @@ if __name__ == "__main__":
     demo = gr.Blocks()
 
     with demo:
-        gr.Markdown("# Gnina-Torch")
-        gr.Markdown(
-            "Score your protein-ligand compex and predict the binding affinity with [Gnina]"
-            + "(https://github.com/gnina/gnina)'s scoring function. Powered by [gnina-torch]"
-            + "(https://github.com/RMeli/gnina-torch), a PyTorch implementation of Gnina's"
-            + " scoring function."
-        )
+        gr.Markdown(load_md("intro.md"))
 
-        gr.Markdown("## Protein and Ligand")
-        gr.Markdown(
-            "Upload your protein and ligand files in PDB and SDF format, respectively."
-            + " Optionally, you can visualise the protein, the ligand, and the"
-            + "protein-ligand complex."
-        )
+        gr.Markdown(load_md("input.md"))
         with gr.Row():
             with gr.Box():
                 pfile = gr.File(file_count="single", label="Protein file (PDB)")
                 gr.Examples(["mols/1cbr_protein.pdb"], inputs=pfile)
-                pbtn = gr.Button("View Protein")
 
-                protein = gr.HTML()
-                pbtn.click(fn=protein_html_from_file, inputs=[pfile], outputs=protein)
+                pbtn = gr.Button("View Protein")
+                pbtn.click(fn=protein_html_from_file, inputs=[pfile], outputs=gr.HTML())
 
             with gr.Box():
                 lfile = gr.File(file_count="single", label="Ligand file (SDF)")
                 gr.Examples(["mols/1cbr_ligand.sdf"], inputs=lfile)
                 lbtn = gr.Button("View Ligand")
 
-                ligand = gr.HTML()
-                lbtn.click(fn=ligand_html_from_file, inputs=[lfile], outputs=ligand)
+                lbtn.click(fn=ligand_html_from_file, inputs=[lfile], outputs=gr.HTML())
 
             with gr.Box():
                 with gr.Column():
-                    plcomplex = gr.HTML()
-
                     # TODO: Automatically display complex when both files are uploaded
                     plbtn = gr.Button("View Protein-Ligand Complex")
                     plbtn.click(
                         fn=protein_ligand_html_from_file,
                         inputs=[pfile, lfile],
-                        outputs=plcomplex,
+                        outputs=gr.HTML(),
                     )
 
-        gr.Markdown("## Gnina-Torch")
-        gr.Markdown(
-            "Score your protein-ligand complex with [gnina-torch]"
-            + "(https://github.com/RMeli/gnina-torch). You can choose between different"
-            + "pre-trained Gnina models. See [McNutte et al. (2021)]"
-            + "(https://doi.org/10.1186/s13321-021-00522-2) for more details."
-        )
+        gr.Markdown(load_md("scoring.md"))
+
         with gr.Row():
             df = gr.Dataframe()
 
@@ -269,10 +257,7 @@ if __name__ == "__main__":
                     btn.click(fn=predict, inputs=[pfile, lfile, dd], outputs=df)
 
         gr.Markdown(
-            "## Acknowledgements\n"
-            + "* Simon Dürr, for the blog post [Visualize proteins on Hugging Face Spaces]"
-            + "(https://huggingface.co/blog/spaces_3dmoljs)\n"
-            + "* Andrew McNutt, for converting Gnina models' weights to PyTorch"
+            load_md("acknowledgements.md"),
         )
 
     demo.launch()
