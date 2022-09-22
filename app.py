@@ -260,4 +260,6 @@ if __name__ == "__main__":
             load_md("acknowledgements.md"),
         )
 
+        gr.Markdown(load_md("references.md"))
+
     demo.launch()
